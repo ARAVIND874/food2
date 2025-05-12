@@ -1,0 +1,437 @@
+<!-- Complete single-file Food Ordering App -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food Ordering App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+    }
+
+    .splash-screen img {
+      width: 150px;
+      height: 150px;
+      animation: pop 1s ease-in-out infinite alternate;
+    }
+
+    .splash-screen h1 {
+      margin-top: 10px;
+      color: #e91e63;
+    }
+
+    @keyframes pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+
+    .hidden { display: none; }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #e91e63;
+    }
+
+    .categories, .search-bar {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .categories button, .print-btn, .back-btn, .delete-btn {
+      margin: 5px;
+      padding: 10px 20px;
+      background: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .search-bar input {
+      padding: 10px;
+      width: 80%;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .food-item {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .food-item img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .cart, .history, .receipt {
+      background: white;
+      padding: 15px;
+      margin-top: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .totals {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background: #e91e63;
+      color: white;
+    }
+
+    .history-item {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .edit-section input {
+      width: 60px;
+      text-align: center;
+    }
+
+    .edit-btn, .save-btn {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    @media print {
+      .no-print { display: none; }
+    }
+    @media (max-width: 600px) {
+  h1, h2 {
+    font-size: 20px;
+  }
+
+  .categories button,
+  .print-btn, .back-btn, .delete-btn {
+    font-size: 12px;
+    padding: 8px 15px;
+  }
+
+  .food-item {
+    padding: 10px;
+  }
+
+  .search-bar input {
+    width: 95%;
+    font-size: 14px;
+  }
+
+  table th, table td {
+    font-size: 12px;
+    padding: 5px;
+  }
+
+  .edit-section input {
+    width: 50px;
+  }
+
+  .edit-btn, .save-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .receipt p {
+    font-size: 14px;
+  }
+
+  .splash-screen img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .splash-screen h1 {
+    font-size: 18px;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash" class="splash-screen">
+  <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="App Logo" />
+  <h1> 😋 TastyFoodies</h1>
+</div>
+
+<!-- Main App -->
+<div class="container hidden" id="mainApp">
+  <div id="orderingView">
+    <h1>🍽️ TastyFoodies</h1>
+    <div class="categories">
+      <button onclick="filterCategory('Tamil Nadu')">Tamil Nadu</button>
+      <button onclick="filterCategory('Indian')">Indian</button>
+      <button onclick="filterCategory('Chinese')">Chinese</button>
+      <button class="print-btn no-print" onclick="addBill()">🧾 Add Bill</button>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search food..." oninput="searchItems()" />
+    </div>
+
+    <div id="food-items" class="food-grid"></div>
+
+    <h2>🛒 Cart</h2>
+    <div id="cart" class="cart"></div>
+    <div id="totals" class="totals"></div>
+
+    <h2>📜 Bill History</h2>
+    <div id="history" class="history"></div>
+  </div>
+
+  <div id="receiptView" style="display:none">
+    <div id="receipt" class="receipt"></div>
+    <div class="no-print" style="text-align:center; margin-top:20px;">
+      <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+      <button onclick="backToHome()" class="back-btn">🔙 Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.onload = () => {
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      loadHistory();
+    }, 2000);
+  };
+
+  const categories = {
+    "Tamil Nadu": ["Idli", "Dhosa", "Poori Masala", "Pongal", "Vada", "Parotta", "Kothu Parotta"],
+    "Indian": ["Butter Chicken", "Paneer Tikka", "Biryani", "Chole Bhature", "Dal Makhani"],
+    "Chinese": ["Fried Rice", "Noodles", "Spring Roll", "Manchurian", "Chow Mein"]
+  };
+
+  const foodImages = {
+    "Idli": "download.webp",
+    "Dhosa": "dhosa.jpeg",
+    "Poori Masala": "Poori Masala.jpeg",
+    "Pongal": "Pongal.jpeg",
+    "Vada": "vada.jpeg",
+    "Parotta": "parotta.jpeg",
+    "Kothu Parotta": "kottu parotta.jpeg",
+    "Butter Chicken": "https://www.indianhealthyrecipes.com/wp-content/uploads/2021/12/butter-chicken-recipe.jpg",
+    "Paneer Tikka": "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Paneer-Tikka-Air-Fryer.jpg",
+    "Biryani": "https://www.indianhealthyrecipes.com/wp-content/uploads/2021/08/chicken-biryani-recipe.jpg",
+    "Chole Bhature": "https://www.whiskaffair.com/wp-content/uploads/2020/04/Chole-Bhature-2-3.jpg",
+    "Dal Makhani": "https://www.indianhealthyrecipes.com/wp-content/uploads/2021/06/dal-makhani.jpg",
+    "Fried Rice": "https://www.indianhealthyrecipes.com/wp-content/uploads/2022/08/veg-fried-rice-recipe.jpg",
+    "Noodles": "https://www.cookwithmanali.com/wp-content/uploads/2019/04/Hakka-Noodles.jpg",
+    "Spring Roll": "https://www.indianhealthyrecipes.com/wp-content/uploads/2022/06/spring-rolls-recipe.jpg",
+    "Manchurian": "https://www.vegrecipesofindia.com/wp-content/uploads/2010/11/veg-manchurian-recipe-1a.jpg",
+    "Chow Mein": "https://www.simplyrecipes.com/thmb/tPfRnl-wO8Ejzzl3WqP4lz4n1k8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Simply-Recipes-Chow-Mein-LEAD-2-2a05413f6be84d3e89d21d225a2d4090.jpg"
+  };
+
+  let foodData = [], cart = {}, currentItems = [];
+
+  Object.entries(categories).forEach(([cat, items], index) => {
+    items.forEach((name, i) => {
+      foodData.push({
+        id: index * 100 + i,
+        name,
+        category: cat,
+        price: 10 + (i % 5) * 15,
+        image: foodImages[name] || `https://via.placeholder.com/150?text=${encodeURIComponent(name)}`
+      });
+    });
+  });
+
+  currentItems = [...foodData];
+  renderItems(currentItems);
+
+  function renderItems(items) {
+    const container = document.getElementById("food-items");
+    container.innerHTML = "";
+    items.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "food-item";
+      div.innerHTML = `
+        <img src="${item.image}" onclick="addToCart(${item.id})" />
+        <h4>${item.name}</h4>
+        <div class="edit-section">
+          ₹<input type="number" id="price-${item.id}" value="${item.price}" disabled />
+          <button class="edit-btn" onclick="enableEdit(${item.id})">Edit</button>
+          <button class="save-btn" id="save-${item.id}" style="display:none;" onclick="saveEdit(${item.id})">Save</button>
+        </div>`;
+      container.appendChild(div);
+    });
+  }
+
+  function enableEdit(id) {
+    document.getElementById(`price-${id}`).disabled = false;
+    document.getElementById(`save-${id}`).style.display = 'inline-block';
+  }
+
+  function saveEdit(id) {
+    const input = document.getElementById(`price-${id}`);
+    const newPrice = parseFloat(input.value);
+    const item = foodData.find(i => i.id === id);
+    if (!isNaN(newPrice)) {
+      item.price = newPrice;
+      input.disabled = true;
+      document.getElementById(`save-${id}`).style.display = 'none';
+      renderCart();
+    }
+  }
+
+  function filterCategory(cat) {
+    currentItems = foodData.filter(f => f.category === cat);
+    renderItems(currentItems);
+  }
+
+  function searchItems() {
+    const q = document.getElementById("searchInput").value.toLowerCase();
+    renderItems(currentItems.filter(i => i.name.toLowerCase().includes(q)));
+  }
+
+  function addToCart(id) {
+    cart[id] = (cart[id] || 0) + 1;
+    renderCart();
+  }
+
+  function renderCart() {
+    const cartContainer = document.getElementById("cart");
+    const totals = document.getElementById("totals");
+    cartContainer.innerHTML = "";
+    let total = 0;
+
+    Object.entries(cart).forEach(([id, qty]) => {
+      const item = foodData.find(f => f.id == id);
+      const amt = item.price * qty;
+      total += amt;
+      cartContainer.innerHTML += `<div>${qty} x ${item.name} = ₹${amt.toFixed(2)}</div>`;
+    });
+
+    totals.textContent = `Total: ₹${total.toFixed(2)}`;
+  }
+
+  function addBill() {
+    if (Object.keys(cart).length === 0) return alert("Cart is empty!");
+    const now = new Date().toLocaleString();
+    const items = Object.entries(cart).map(([id, qty]) => {
+      const item = foodData.find(f => f.id == id);
+      return { qty, name: item.name, price: item.price, amount: item.price * qty };
+    });
+    const total = items.reduce((sum, i) => sum + i.amount, 0).toFixed(2);
+    const bill = { date: now, items, total };
+    const history = JSON.parse(localStorage.getItem("billHistory") || "[]");
+    history.push(bill);
+    localStorage.setItem("billHistory", JSON.stringify(history));
+    showReceipt(bill);
+    cart = {};
+    renderCart();
+    loadHistory();
+  }
+
+  function showReceipt(bill) {
+    document.getElementById("orderingView").style.display = "none";
+    document.getElementById("receiptView").style.display = "block";
+    const receipt = document.getElementById("receipt");
+    const receiptNum = Math.floor(Math.random() * 90000 + 10000);
+    let html = `<h2 style="text-align:center; color:#e91e63;">🍜 Foodies Restaurant</h2>
+    <p style="text-align:center;">123 Food Street, Chennai, Tamil Nadu</p>
+    <p><strong>Receipt No:</strong> #${receiptNum}<br><strong>Date:</strong> ${bill.date}</p>
+    <table><tr><th>Qty</th><th>Item</th><th>Price</th><th>Amount</th></tr>`;
+    bill.items.forEach(i => {
+      html += `<tr><td>${i.qty}</td><td>${i.name}</td><td>₹${i.price}</td><td>₹${i.amount.toFixed(2)}</td></tr>`;
+    });
+    html += `</table><h3 class="totals">Total: ₹${bill.total}</h3>`;
+    receipt.innerHTML = html;
+  }
+
+  function backToHome() {
+    document.getElementById("orderingView").style.display = "block";
+    document.getElementById("receiptView").style.display = "none";
+  }
+
+  function loadHistory() {
+    const historyDiv = document.getElementById("history");
+    const history = JSON.parse(localStorage.getItem("billHistory") || "[]");
+    historyDiv.innerHTML = "";
+    history.forEach((bill, i) => {
+      historyDiv.innerHTML += `
+        <div class="history-item">
+          <span>🧾 ${bill.date} - ₹${bill.total}</span>
+          <div>
+            <button class="print-btn" onclick='showReceipt(${JSON.stringify(bill)})'>View</button>
+            <button class="delete-btn" onclick='deleteBill(${i})'>Delete</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  function deleteBill(index) {
+    const history = JSON.parse(localStorage.getItem("billHistory") || "[]");
+    if (confirm("Are you sure to delete this bill?")) {
+      history.splice(index, 1);
+      localStorage.setItem("billHistory", JSON.stringify(history));
+      loadHistory();
+    }
+  }
+</script>
+</body>
+</html>
