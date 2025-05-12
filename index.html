@@ -80,29 +80,33 @@
       border-radius: 20px;
     }
 
-    .food-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 15px;
-    }
+      .food-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
 
-    .food-item {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
 
-  .food-item img {
+.food-item {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  width: 120px;
+}
+
+.food-item img {
   width: 100px;
   height: 100px;
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
-  margin: auto;
-  display: inline;
+  display: block;
+  margin: 0 auto 5px auto;
 }
+
 
     .cart, .history, .receipt {
       background: white;
